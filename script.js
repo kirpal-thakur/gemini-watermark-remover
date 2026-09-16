@@ -10,6 +10,11 @@ const imageInput=$("#imageInput"),imageDrop=$("#imageDrop"),imageChoose=$("#imag
 const videoInput=$("#videoInput"),videoDrop=$("#videoDrop"),videoChoose=$("#videoChoose");
 let enginePromise=null, images=[], selected=0, sliderDragging=false;
 
+// GA4 helper: sends interaction metadata only, never file contents or filenames.
+function trackEvent(name, params={}){
+  if(typeof window.gtag === "function") window.gtag("event", name, params);
+}
+
 imageMode.onclick=()=>switchMode("image");
 videoMode.onclick=()=>switchMode("video");
 function switchMode(mode){
@@ -17,6 +22,7 @@ function switchMode(mode){
   videoMode.classList.toggle("active",mode==="video");
   imageTool.classList.toggle("active-tool",mode==="image");
   videoTool.classList.toggle("active-tool",mode==="video");
+  trackEvent("mode_switch", {mode});
 }
 
 imageChoose.onclick=()=>imageInput.click();
@@ -25,6 +31,8 @@ imageInput.onchange=()=>{addImages([...imageInput.files]);imageInput.value=""};
 
 function addImages(files){
   files=files.filter(f=>["image/png","image/jpeg","image/webp"].includes(f.type));
+  if(!files.length)return;
+  trackEvent("image_upload", {count: files.length});
   files.forEach(file=>images.push({file,original:URL.createObjectURL(file),clean:null,blob:null,applied:false}));
   if(!images.length)return;
   $("#imageDrop").classList.add("hidden");
@@ -50,6 +58,7 @@ function selectImage(i){
 }
 async function processImage(i){
   try{
+    trackEvent("image_processing_started");
     const x=images[i],bitmap=await createImageBitmap(x.file),canvas=document.createElement("canvas");
     canvas.width=bitmap.width;canvas.height=bitmap.height;canvas.getContext("2d").drawImage(bitmap,0,0);bitmap.close();
     const ctx=canvas.getContext("2d",{willReadFrequently:true});
@@ -57,8 +66,13 @@ async function processImage(i){
     const out=document.createElement("canvas");out.width=result.imageData.width;out.height=result.imageData.height;
     out.getContext("2d").putImageData(result.imageData,0,0);
     x.blob=await blob(out);x.clean=URL.createObjectURL(x.blob);x.applied=Boolean(result.meta?.applied);
+    trackEvent("image_processing_completed", {watermark_detected: x.applied ? "yes" : "no"});
     if(i===selected)selectImage(i);
-  }catch(e){console.error(e);if(i===selected)$("#imageStatus").textContent="Processing failed";}
+  }catch(e){
+    console.error(e);
+    trackEvent("image_processing_error");
+    if(i===selected)$("#imageStatus").textContent="Processing failed";
+  }
 }
 function getEngine(){if(!enginePromise)enginePromise=createWatermarkEngine();return enginePromise}
 function blob(c){return new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error("encode failed")),"image/png"))}
@@ -72,17 +86,28 @@ slider.onpointerup=slider.onpointercancel=()=>sliderDragging=false;
 stage.onpointerdown=e=>{if(!e.target.closest(".compare-slider"))setSlider(pct(e.clientX))};
 
 $("#downloadImage").onclick=()=>{
-  const x=images[selected];if(x?.blob)download(x.blob,"gemini-clean-"+base(x.file.name)+".png")
+  const x=images[selected];
+  if(x?.blob){
+    trackEvent("image_download", {format:"png"});
+    download(x.blob,"gemini-clean-"+base(x.file.name)+".png");
+  }
 };
 $("#copyImage").onclick=async()=>{
   const x=images[selected];if(!x?.blob)return;
-  try{await navigator.clipboard.write([new ClipboardItem({"image/png":x.blob})]);$("#imageStatus").textContent="Image copied"}catch{$("#imageStatus").textContent="Clipboard access unavailable"}
+  try{
+    await navigator.clipboard.write([new ClipboardItem({"image/png":x.blob})]);
+    trackEvent("image_copy", {format:"png"});
+    $("#imageStatus").textContent="Image copied";
+  }catch{$("#imageStatus").textContent="Clipboard access unavailable"}
 };
 $("#downloadZip").onclick=async()=>{
   const ready=images.filter(x=>x.blob);if(!ready.length)return;
   const {default:JSZip}=await import("https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm");
   const zip=new JSZip();ready.forEach((x,i)=>zip.file("clean-"+base(x.file.name)+"-"+(i+1)+".png",x.blob));
-  $("#imageStatus").textContent="Creating ZIP…";download(await zip.generateAsync({type:"blob",compression:"STORE"}),"gemini-watermark-remover.zip")
+  $("#imageStatus").textContent="Creating ZIP…";
+  const zipBlob=await zip.generateAsync({type:"blob",compression:"STORE"});
+  trackEvent("image_zip_download", {count: ready.length});
+  download(zipBlob,"gemini-watermark-remover.zip")
 };
 $("#clearImages").onclick=()=>{images.forEach(x=>{URL.revokeObjectURL(x.original);if(x.clean)URL.revokeObjectURL(x.clean)});images=[];$("#imageEditor").classList.add("hidden");$("#imageDrop").classList.remove("hidden")};
 
@@ -124,14 +149,21 @@ function getVideoMimePreference(){
 function loadVideo(files){
   const f=files.find(x=>x.type.startsWith("video/"));if(!f)return;
   if(videoOutput){URL.revokeObjectURL(videoOutput);videoOutput=null}
-  videoFile=f;$("#videoDrop").classList.add("hidden");$("#videoEditor").classList.remove("hidden");
+  videoFile=f;
+  trackEvent("video_upload", {format: f.type || "unknown"});
+  $("#videoDrop").classList.add("hidden");$("#videoEditor").classList.remove("hidden");
   $("#videoBefore").src=URL.createObjectURL(f);$("#videoAfter").removeAttribute("src");
   $("#downloadVideo").classList.add("disabled-action");$("#videoProgressBar").style.width="0";
   $("#videoStatus").textContent=`Ready · ${formatBytes(f.size)}`;
 }
 $("#clearVideo").onclick=()=>{videoOutput&&URL.revokeObjectURL(videoOutput);videoOutput=null;videoFile=null;$("#videoBefore").removeAttribute("src");$("#videoAfter").removeAttribute("src");$("#videoEditor").classList.add("hidden");$("#videoDrop").classList.remove("hidden");$("#videoProgressBar").style.width="0"};
 $("#processVideo").onclick=processVideo;
-$("#downloadVideo").onclick=()=>{if(videoOutput)downloadUrl(videoOutput,`gemini-video-clean.${videoOutputExt}`)};
+$("#downloadVideo").onclick=()=>{
+  if(videoOutput){
+    trackEvent("video_download", {format: videoOutputExt});
+    downloadUrl(videoOutput,`gemini-video-clean.${videoOutputExt}`);
+  }
+};
 
 function formatBytes(n){if(n<1024*1024)return `${(n/1024).toFixed(0)} KB`;return `${(n/1024/1024).toFixed(1)} MB`}
 function deriveWatermarkMask(src,clean,w,h){
@@ -165,6 +197,7 @@ function applyStaticMask(frame,mask){
 }
 async function processVideo(){
   if(!videoFile)return;
+  trackEvent("video_processing_started");
   const v=$("#videoBefore"),canvas=$("#videoCanvas"),ctx=canvas.getContext("2d",{willReadFrequently:true});
   try{
     await new Promise((resolve,reject)=>{if(v.readyState>=2)resolve();else{v.onloadedmetadata=resolve;v.onerror=reject}});
@@ -205,7 +238,11 @@ async function processVideo(){
     await done;
     videoOutput=URL.createObjectURL(new Blob(chunks,{type:choice.mime.split(";")[0]}));$("#videoAfter").src=videoOutput;$("#downloadVideo").classList.remove("disabled-action");
     $("#videoProgressBar").style.width="100%";$("#videoStatus").textContent=`Finished · ${choice.ext.toUpperCase()} · watermark mask reused across frames`;
-  }catch(e){console.error(e);$("#videoStatus").textContent=`Video export failed: ${e.message||e}`}
+  }catch(e){
+    console.error(e);
+    trackEvent("video_processing_error");
+    $("#videoStatus").textContent=`Video export failed: ${e.message||e}`;
+  }
   finally{$("#processVideo").classList.remove("disabled-action")}
 }
 function downloadUrl(url,name){const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove()}

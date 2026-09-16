@@ -52,7 +52,12 @@ See `LICENSE` and `THIRD-PARTY-NOTICES.md` before redistributing or modifying th
 
 The comparison section uses two local image files placed in the repository root:
 
-- `with-watermark.jpeg` — the before/example image
+- `with-watermark.png` — the before/example image
 - `without-watermark.png` — the cleaned/after example image
 
 Replace these two files with your own authorized example images. The HTML already references these exact filenames, so no code change is required.
+
+
+### Analytics
+
+This site includes Google Analytics 4 using the Measurement ID configured in `index.html`. The frontend records page views and non-sensitive interaction events such as image/video uploads, processing starts/completions/errors, and downloads. It does not send image or video contents or filenames to Analytics.
