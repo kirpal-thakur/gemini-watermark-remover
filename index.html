@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gemini Watermark Remover</title>
+<meta name="description" content="Gemini Watermark Remover for images and videos. Browser-local processing.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="nav">
+  <a class="logo" href="#top" aria-label="Gemini Watermark Remover">
+    <span class="logo-mark">✦</span><span>Gemini Watermark Remover</span>
+  </a>
+  <nav>
+    <a href="#faq">FAQ</a>
+  </nav>
+  <div class="nav-actions">
+  </div>
+</header>
+
+<main id="top">
+<section class="hero">
+  <div class="hero-copy">
+    <h1>Gemini Watermark Remover</h1>
+    <p>Remove supported visible Gemini watermarks from images and videos directly in your browser.<br>
+    No account required — <b>browser-local processing.</b></p>
+  </div>
+
+  <div class="hero-decor" aria-hidden="true">
+    <div class="hero-art hero-art-left">
+      <div class="art-sheen"></div>
+      <div class="art-bubbles"><span></span><span></span><span></span></div>
+      <div class="art-label">IMAGE</div>
+    </div>
+    <div class="hero-art hero-art-right">
+      <div class="art-sheen"></div>
+      <div class="art-ribbons"></div>
+      <div class="art-label">VIDEO</div>
+    </div>
+  </div>
+
+  <div class="mode-switch" id="tool">
+    <button id="imageMode" class="mode active">▧ <span>Images</span></button>
+    <button id="videoMode" class="mode">▷ <span>Videos</span><b>BETA</b></button>
+  </div>
+
+  <div id="toolbox" class="toolbox">
+    <div id="imageTool" class="tool active-tool">
+      <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden>
+      <div id="imageDrop" class="dropbox">
+        <button id="imageChoose" class="start-btn">＋ &nbsp;Start with photos</button>
+        <div class="drop-text">or drag images here</div>
+        <div class="formats">JPG · PNG · WebP · Batch supported</div>
+      </div>
+      <div id="imageEditor" class="editor hidden">
+        <button id="clearImages" class="round-close">×</button>
+        <div id="thumbs" class="thumbs"></div>
+        <div class="compare">
+          <img id="before" alt="Before">
+          <div id="afterPane"><img id="after" alt="After"></div>
+          <span class="tag before-tag">Before</span><span class="tag after-tag">After</span>
+          <div id="compareSlider" class="compare-slider"><span>↔</span></div>
+        </div>
+        <div class="tool-actions">
+          <button id="downloadImage" class="action primary">⇩<span>Free download</span></button>
+          <button id="copyImage" class="action">▣<span>Copy image</span></button>
+          <button id="downloadZip" class="action">▤<span>Download ZIP</span></button>
+          <button id="addImages" class="action">＋<span>Add more</span></button>
+          <button class="action disabled-action">⌫<span>Remove background</span></button>
+          <button class="action disabled-action">✣<span>AI edit</span></button>
+        </div>
+        <div id="imageStatus" class="status">Ready</div>
+      </div>
+    </div>
+
+    <div id="videoTool" class="tool">
+      <input id="videoInput" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-matroska" hidden>
+      <div id="videoDrop" class="dropbox video-drop">
+        <button id="videoChoose" class="start-btn">＋ &nbsp;Start with a video</button>
+        <div class="drop-text">or drag a video here</div>
+        <div class="formats">MP4 · WebM · MOV · Browser-local beta</div>
+      </div>
+      <div id="videoEditor" class="video-editor hidden">
+        <button id="clearVideo" class="round-close">×</button>
+        <div class="video-label">Video preview · play to remove watermark</div>
+        <div class="single-video-player">
+          <video id="videoBefore" playsinline preload="metadata"></video>
+          <canvas id="videoCanvas"></canvas>
+          <div class="video-play-overlay" id="videoPlayOverlay">
+            <button id="videoPlay" class="big-play" aria-label="Play and remove watermark">▶</button>
+            <div>Play video to start watermark removal</div>
+          </div>
+          <div class="custom-video-controls">
+            <button id="videoTogglePlay" type="button" aria-label="Play">▶</button>
+            <div class="custom-seek"><div id="customSeekBar"></div></div>
+            <span id="videoTime">0:00 / 0:00</span>
+            <button id="videoMute" type="button" aria-label="Mute">🔊</button>
+          </div>
+        </div>
+        <div class="video-progress"><div id="videoProgressBar"></div></div>
+        <div class="video-controls">
+          <label class="output-control">Output
+            <select id="videoOutputFormat">
+              <option value="same">Same as original</option>
+              <option value="mp4">MP4</option>
+              <option value="webm">WebM</option>
+            </select>
+          </label>
+          <span class="video-note">Watermark detection runs once. Cleanup is applied live while the video plays.</span>
+        </div>
+        <div id="videoStatus" class="status">Ready · press play to begin</div>
+        <div class="video-actions">
+          <button id="processVideo" class="action primary">▶<span>Play & remove watermark</span></button>
+          <button id="downloadVideo" class="action disabled-action">⇩<span>Download cleaned video</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="privacy-note">Designed for browser-local processing. Media is handled on your device during the cleanup workflow.</div>
+</section>
+
+<section class="trust-row">
+  <div>♜ <strong>Browser-local<br>processing</strong></div>
+  <div>ϟ <strong>No account<br>required</strong></div>
+  <div>✓ <strong>Supported visible<br>watermark patterns</strong></div>
+</section>
+
+<section class="feature-section">
+  <div class="feature-visual">
+    <div class="mock-window">
+      <div class="window-dots" aria-hidden="true">● ● ●</div>
+      <div class="demo-images">
+        <figure class="demo-image">
+          <img src="with-watermark.jpeg" alt="Example image with watermark">
+        </figure>
+        <figure class="demo-image">
+          <img src="without-watermark.png" alt="Example image after watermark cleanup">
+        </figure>
+      </div>
+      <div class="demo-captions">
+        <b>WATERMARKED</b><span>Before</span>
+        <b>RESTORED</b><span>After cleanup</span>
+      </div>
+    </div>
+  </div>
+  <div class="feature-copy">
+    <h2>Clean, supported<br>watermark restoration</h2>
+    <p>Uses the supported restoration engine to clean visible watermark regions without relying on generic blur or repainting. Results depend on the watermark pattern and source media.</p>
+    <button class="dark-btn" onclick="document.querySelector('#tool').scrollIntoView({behavior:'smooth'})">Try it free</button>
+  </div>
+</section>
+
+<section class="steps">
+  <h2>How to remove a Gemini watermark online</h2>
+  <div class="cards">
+    <article><label>Step 1</label><h3>Upload your photos</h3><p>Drag or select watermark-affected images. JPG, PNG and WebP are supported. Batch processing is available.</p></article>
+    <article><label>Step 2</label><h3>Auto-remove watermark</h3><p>Runs in-browser and uses the supported local restoration engine. Your files stay on your device.</p></article>
+    <article><label>Step 3</label><h3>Download clean images</h3><p>Download clean images one by one or as a ZIP. Video processing is currently a beta browser workflow and output support depends on the selected format and browser.</p></article>
+  </div>
+</section>
+
+<section class="kit">
+  <h2>Gemini watermark removal toolkit</h2>
+  <p>Browser-local image processing · batch workflows · supported video cleanup · no account required</p>
+  <div class="features">
+    <div><i>✣</i><h3>Supported watermark restoration</h3><p>Uses the integrated browser restoration engine for supported visible Gemini watermark patterns.</p></div>
+    <div><i>☆</i><h3>Gemini logo and star patterns</h3><p>Designed around supported visible watermark variants found in compatible generated media.</p></div>
+    <div><i>▣</i><h3>Batch image processing</h3><p>Select multiple images, process them locally, then download results individually or as a ZIP.</p></div>
+    <div><i>♢</i><h3>Browser-local workflow</h3><p>The image cleanup workflow is designed to run in the browser without a server-side processing step.</p></div>
+    <div><i>▧</i><h3>Common image formats</h3><p>Accepts JPG, PNG and WebP images and exports processed PNG results.</p></div>
+    <div><i>⌘</i><h3>Video beta</h3><p>Process supported visible Gemini-style marks in compatible browsers. Video capabilities may vary by source and browser.</p></div>
+    <div><i>◉</i><h3>No account required</h3><p>Start with your media without creating an account or signing in.</p></div>
+    <div><i>▱</i><h3>Modern browser support</h3><p>Designed for current browsers, with video codec and performance support varying by device and browser.</p></div>
+    <div><i>&lt;/&gt;</i><h3>Open-source foundation</h3><p>Built with documented open-source browser components and third-party dependencies listed in the repository.</p></div>
+  </div>
+</section>
+
+
+<section class="faq-section" id="faq">
+  <div class="faq-heading">
+    <h2>Frequently asked<br>questions</h2>
+    <p>Answers about supported files, browser processing and the current video beta.</p>
+  </div>
+  <div class="faq-list">
+    <details open>
+      <summary>How do I remove a Gemini watermark from an image?</summary>
+      <p>Select an image, let the browser process the supported watermark pattern, preview the result, and download the cleaned image.</p>
+    </details>
+    <details>
+      <summary>Can I process Gemini-generated videos?</summary>
+      <p>Yes, video processing is available as a beta workflow for supported visible watermark patterns. Browser codec support, device performance and the source video can affect the result.</p>
+    </details>
+    <details>
+      <summary>Do I need to create an account?</summary>
+      <p>No. The site is designed to let you start processing without signing in or creating an account.</p>
+    </details>
+    <details>
+      <summary>Are my images and videos uploaded?</summary>
+      <p>The processing workflow is designed to run in your browser. The site may still contact external services to load JavaScript libraries or other website resources.</p>
+    </details>
+    <details>
+      <summary>Which image formats are supported?</summary>
+      <p>JPG, PNG and WebP are supported for the image workflow. Processed images are exported as PNG.</p>
+    </details>
+    <details>
+      <summary>Which video formats can I use?</summary>
+      <p>The interface accepts common MP4, WebM and MOV files. Actual playback and export support depends on the browser and its available codecs.</p>
+    </details>
+    <details>
+      <summary>Will every watermark be removed perfectly?</summary>
+      <p>No. The tool is intended for supported visible watermark patterns. Results can vary with the source, watermark appearance, compression and video motion.</p>
+    </details>
+    <details>
+      <summary>Does this remove invisible AI provenance such as SynthID?</summary>
+      <p>No. This project is intended for visible watermark cleanup and does not claim to remove invisible provenance signals.</p>
+    </details>
+  </div>
+</section>
+
+<section class="video-cta" id="video">
+  <h2>Gemini Video Watermark Remover</h2>
+  <p>Upload a video you are authorized to edit and process the visible watermark locally in your browser.</p>
+  <button class="dark-btn" onclick="document.getElementById('videoMode').click();document.getElementById('tool').scrollIntoView({behavior:'smooth'})">Open video remover</button>
+</section>
+</main>
+
+<footer>Gemini Watermark Remover · Independent project, not affiliated with Google, Gemini, or Veo. Visible watermark cleanup only; invisible provenance signals such as SynthID are not removed.</footer>
+<script type="module" src="script.js"></script>
+</body>
+</html>
