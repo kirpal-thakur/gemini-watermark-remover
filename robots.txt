@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kirpal-thakur.github.io/gemini-watermark-remover/sitemap.xml
