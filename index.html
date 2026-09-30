@@ -99,7 +99,7 @@
       "name": "Can I process Gemini-generated videos?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, video processing is available as a beta workflow for supported visible watermark patterns. Browser codec support, device performance and the source video can affect the result."
+        "text": "Yes, video processing is available as a browser workflow for supported visible watermark patterns. Browser codec support, device performance and the source video can affect the result."
       }
     },
     {
@@ -177,32 +177,30 @@
 
 <section class="hero">
   <div class="hero-copy">
-    <h1>Gemini Watermark Remover</h1>
-
-
-<p>
-  Remove supported visible Gemini watermarks from images and videos
-  directly in your browser.<br>
-  No account required — <b>browser-local processing.</b>
-</p>
-
+    <div class="hero-eyebrow">✦ 100% Free · Private &amp; Local</div>
+    <h1>Free Gemini Watermark Remover &amp; Logo Remover</h1>
+    <p>
+      Remove supported visible Gemini watermarks from images and videos
+      directly in your browser. Clean Gemini and Nano Banana images locally,
+      with no account and no media upload required.
+    </p>
+    <div class="hero-badges" aria-label="Tool benefits">
+      <span>✦ Gemini Image Watermark Remover</span>
+      <span>▣ Gemini &amp; Nano Banana Images</span>
+      <span>▷ Gemini Video Watermark Remover</span>
+      <span>✓ Private &amp; Local Processing</span>
+    </div>
   </div>
 
   <div class="hero-decor" aria-hidden="true">
     <div class="hero-art hero-art-left">
-      <div class="art-sheen"></div>
-      <div class="art-bubbles"><span></span><span></span><span></span></div>
-      <div class="art-label">IMAGE</div>
+      <img src="with-watermark.jpeg" alt="" loading="eager">
+      <div class="art-label">BEFORE</div>
     </div>
-
-
-<div class="hero-art hero-art-right">
-  <div class="art-sheen"></div>
-  <div class="art-ribbons"></div>
-  <div class="art-label">VIDEO</div>
-</div>
-
-
+    <div class="hero-art hero-art-right">
+      <img src="without-watermark.png" alt="" loading="eager">
+      <div class="art-label">AFTER</div>
+    </div>
   </div>
 
   <div class="mode-switch" id="tool">
@@ -212,7 +210,7 @@
 
 
 <button id="videoMode" class="mode" type="button">
-  ▷ <span>Videos</span><b>BETA</b>
+  ▷ <span>Videos</span><b></b>
 </button>
 
 
@@ -245,19 +243,20 @@
 
     <div id="thumbs" class="thumbs"></div>
 
-    <div class="compare">
-      <img id="before" alt="Original image with visible Gemini watermark">
-      <div id="afterPane">
-        <img id="after" alt="Processed image after visible watermark cleanup">
+    <div class="image-result">
+      <div class="image-result-tabs" role="tablist" aria-label="Image comparison">
+        <button id="beforeTab" class="result-tab active" type="button" role="tab"
+                aria-selected="true">Before</button>
+        <button id="afterTab" class="result-tab" type="button" role="tab"
+                aria-selected="false">After</button>
       </div>
-
-      <span class="tag before-tag">Before</span>
-      <span class="tag after-tag">After</span>
-
-      <div id="compareSlider"
-           class="compare-slider"
-           aria-label="Compare original and processed image">
-        <span>↔</span>
+      <div class="image-preview">
+        <img id="before" alt="Original image with visible Gemini watermark">
+        <img id="after" class="hidden-result" alt="Processed image after visible watermark cleanup">
+        <div id="imagePreviewState" class="image-preview-state hidden">
+          <span class="spinner"></span>
+          <span>Processing locally…</span>
+        </div>
       </div>
     </div>
 
@@ -304,61 +303,51 @@
     </button>
 
     <div class="drop-text">or drag a video here</div>
-    <div class="formats">MP4 · WebM · MOV · Browser-local beta</div>
+    <div class="formats">MP4 · WebM · MOV · Browser-local</div>
   </div>
 
   <div id="videoEditor" class="video-editor hidden">
-
-    <button id="clearVideo"
-            class="round-close"
-            type="button"
+    <button id="clearVideo" class="round-close" type="button"
             aria-label="Clear selected video">×</button>
 
-    <div class="video-label">
-      Video preview · play to remove watermark
-    </div>
+    <div class="video-label">Video preview · original and cleaned versions</div>
 
-    <div class="single-video-player">
-
-      <video id="videoBefore"
-             playsinline
-             preload="metadata"
-             aria-label="Video preview"></video>
-
-      <canvas id="videoCanvas"></canvas>
-
-      <div class="video-play-overlay" id="videoPlayOverlay">
-        <button id="videoPlay"
-                class="big-play"
-                type="button"
-                aria-label="Play and remove watermark">
-          ▶
-        </button>
-
-        <div>Play video to start watermark removal</div>
+    <div class="video-grid">
+      <div class="video-panel">
+        <span class="video-panel-label">Original</span>
+        <video id="videoBefore" playsinline preload="metadata"
+               aria-label="Original video preview"></video>
       </div>
 
-      <div class="custom-video-controls">
-
-        <button id="videoTogglePlay"
-                type="button"
-                aria-label="Play">▶</button>
-
-        <div class="custom-seek">
-          <div id="customSeekBar"></div>
+      <div class="video-panel processed-panel">
+        <span class="video-panel-label">Processed</span>
+        <div id="processedVideoStage" class="processed-video-stage">
+          <canvas id="videoCanvas"></canvas>
+          <video id="videoAfter" class="hidden" playsinline preload="metadata"
+                 aria-label="Processed video preview"></video>
+          <div class="video-ready-state" id="videoReadyState">
+            <div class="ready-icon">▷</div>
+            <strong>Ready to process</strong>
+            <p>Press the play button below to remove the watermark locally.</p>
+          </div>
         </div>
-
-        <span id="videoTime">0:00 / 0:00</span>
-
-        <button id="videoMute"
-                type="button"
-                aria-label="Mute">🔊</button>
       </div>
     </div>
 
-    <div class="video-progress">
-      <div id="videoProgressBar"></div>
+    <div class="video-player-controls">
+      <button id="videoTogglePlay" class="player-play disabled-action" type="button" disabled
+              aria-label="Play processed video">▶</button>
+      <div class="custom-seek video-progress" id="customSeek" aria-label="Video progress">
+        <div id="videoProgressBar">
+          
+        </div>
+      </div>
+      <span id="videoTime">0:00 / 0:00</span>
+      <button id="videoMute" class="player-icon" type="button"
+              aria-label="Mute video">🔊</button>
     </div>
+
+   
 
     <div class="video-controls">
 
@@ -373,28 +362,27 @@
       </label>
 
       <span class="video-note">
-        Watermark detection runs once. Cleanup is applied live while the video plays.
+        Watermark detection runs once. The cleaned video is generated locally and can be previewed before download.
       </span>
     </div>
 
     <div id="videoStatus" class="status">
-      Ready · press play to begin
+      Ready · start local cleanup to create the processed preview
     </div>
 
     <div class="video-actions">
-
-      <button id="processVideo"
-              class="action primary"
-              type="button">
-        ▶<span>Play & remove watermark</span>
+      <button id="chooseAnotherVideo" class="action" type="button">
+        ↥<span>Choose another</span>
       </button>
-
-      <button id="downloadVideo"
-              class="action disabled-action"
-              type="button">
-        ⇩<span>Download cleaned video</span>
+      <button id="resetVideo" class="action" type="button">
+        ↻<span>Reset</span>
       </button>
-
+      <a class="action cli-action" href="#how-it-works">
+        &lt;/&gt;<span>Open CLI Guide</span>
+      </a>
+      <button id="downloadVideo" class="action primary disabled-action" type="button" disabled>
+        ⇩<span>Download MP4</span>
+      </button>
     </div>
   </div>
 </div>
@@ -507,7 +495,7 @@
   <h3>Download the Clean Image</h3>
   <p>
     Preview the processed result and download individual images or a ZIP.
-    Video processing is currently available as a beta browser workflow.
+    Video processing is currently available as a browser workflow.
   </p>
 </article>
 
@@ -572,7 +560,7 @@
 
 <div>
   <i>⌘</i>
-  <h3>Gemini Video Watermark Remover Beta</h3>
+  <h3>Gemini Video Watermark Remover</h3>
   <p>
     Process supported visible Gemini-style marks in compatible browsers.
     Video capabilities may vary by source and browser.
@@ -618,7 +606,7 @@
 
 <p>
   Answers about Gemini watermark removal, supported files,
-  browser processing and the current video beta.
+  browser processing and the current video workflow.
 </p>
 
 
@@ -638,7 +626,7 @@
 <details>
   <summary>Can I process Gemini-generated videos?</summary>
   <p>
-    Yes, video processing is available as a beta workflow for supported
+    Yes, video processing is available as a browser workflow for supported
     visible watermark patterns. Browser codec support, device performance
     and the source video can affect the result.
   </p>
